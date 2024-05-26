@@ -13,6 +13,10 @@ export class NC {
     this.creator = createButton;
     this.creatorOptions = {};
 
+    this.undoHistory = [];
+    this.redoHistory = [];
+    this.maxUndo = 100;
+
     this.init();
   }
 
@@ -20,6 +24,11 @@ export class NC {
     this.createButtons();
     this.populateInsertMarkers();
     this.listen();
+  }
+
+  saveUndo() {
+    this.undoHistory.push(this.root.innerHTML);
+    if (this.undoHistory.length > this.maxUndo) this.undoHistory.shift();
   }
 
   createButtons() {
@@ -85,9 +94,7 @@ export class NC {
   }
 
   listen() {
-    window.addEventListener("mousemove", (e) => {
-      if (!this.inside(e))
-        return this.insertMarkers.forEach((e) => e.classList.remove("hl"));
+    this.root.addEventListener("mousemove", (e) => {
       const here = { x: e.clientX, y: e.clientY };
       const p = [...document.elementsFromPoint(here.x, here.y)]
         .slice(0, -3)
@@ -125,15 +132,15 @@ export class NC {
       s.addRange(r);
     };
 
-    window.addEventListener("contextmenu", (e) => {
+    this.root.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       editEl(e.target);
     });
 
-    window.addEventListener("click", (e) => {
-      if (!this.inside(e)) return;
+    this.root.addEventListener("click", (e) => {
       if (e.target instanceof HTMLHeadingElement) {
         editEl(e.target);
+        e.target.addEventListener("change", this.saveUndo);
         return;
       }
 
@@ -144,8 +151,22 @@ export class NC {
           getLineDistance(here, getOffset(b)),
       )[0];
 
+      this.redoHistory = [];
+      this.saveUndo();
       closestInsertMarker.replaceWith(this.creator(this.creatorOptions));
       this.populateInsertMarkers();
+    });
+
+    window.addEventListener("keypress", (e) => {
+      if (e.key == "z" && e.ctrlKey) {
+        const content = this.root.innerHTML;
+        this.redoHistory.push(content);
+        this.root.innerHTML = this.undoHistory.pop() || content;
+      } else if (e.key == "r" && e.ctrlKey) {
+        const content = this.root.innerHTML;
+        this.saveUndo();
+        this.root.innerHTML = this.redoHistory.pop() || content;
+      }
     });
   }
 
@@ -154,15 +175,5 @@ export class NC {
     insertMarker.classList.add("insert-marker");
     this.insertMarkers.push(insertMarker);
     return insertMarker;
-  }
-
-  inside({ clientX, clientY }) {
-    const rect = getOffset(this.root);
-    return (
-      clientX >= rect.x &&
-      clientY >= rect.y &&
-      clientX <= rect.x2 &&
-      clientY <= rect.y2
-    );
   }
 }

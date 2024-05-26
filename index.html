@@ -8,14 +8,14 @@
     <script src="https://unpkg.com/tailwindcss-cdn@3.4.1/tailwindcss.js"></script>
   </head>
   <body>
-    <div id="main" class="bg-white dark:bg-gray-800"></div>
-    <div class="container mx-auto">
-      <p id="path"></p>
+    <div id="main" class="h-screen bg-white dark:bg-gray-800"></div>
+    <div class="w-screen shadow-md p-2 mx-auto absolute bottom-0 z-10">
+      <p id="path" class="dark:text-white"></p>
+      <div id="options" class="space-y-2"></div>
       <div
         id="buttons"
         class="p-3 m-3 flex justify-between rounded-md shadow-md"
       ></div>
-      <div id="options"></div>
     </div>
     <script type="module" src="js/main.js"></script>
   </body>

@@ -1,8 +1,8 @@
 export function createButton({ background } = { background: "blue" }) {
-  const classes = `bg-${background}-500 hover:bg-${background}-700 text-white font-bold py-2 px-4 rounded`;
+  const classes = `muy-editable bg-${background}-500 hover:bg-${background}-700 text-white font-bold py-2 px-4 rounded`;
   const el = document.createElement("button");
   el.setAttribute("data-name", "button");
-  el.innerHTML = '<span class="muy-editable">Button</span>';
+  el.innerHTML = "Button";
   el.classList.add(...classes.split(" "));
   return el;
 }
