@@ -22,12 +22,29 @@ export function walk(node, func, depth = 0) {
   });
 }
 
-export function getLineDistance(here, line) {
+export function getLineDistance(point, line) {
+  const { x, y } = point;
   const { x: x1, y: y1, x2, y2 } = line;
-  const { x: x0, y: y0 } = here;
 
-  return (
-    Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) /
-    distance({ x: x1, y: y1 }, { x: x2, y: y2 })
-  );
+  const deltaX = x - x1;
+  const deltaY = y - y1;
+  const lineDeltaX = x2 - x1;
+  const lineDeltaY = y2 - y1;
+
+  const dotProduct = deltaX * lineDeltaX + deltaY * lineDeltaY;
+  const lineLengthSquared = lineDeltaX * lineDeltaX + lineDeltaY * lineDeltaY;
+  const parameter =
+    lineLengthSquared !== 0 ? dotProduct / lineLengthSquared : -1;
+
+  const nearestX =
+    parameter < 0 ? x1 : parameter > 1 ? x2 : x1 + parameter * lineDeltaX;
+  const nearestY =
+    parameter < 0 ? y1 : parameter > 1 ? y2 : y1 + parameter * lineDeltaY;
+
+  const dx = x - nearestX;
+  const dy = y - nearestY;
+
+  // Squared distance is okay for comparison
+  // return Math.sqrt(dx * dx + dy * dy)
+  return dx * dx + dy * dy;
 }
