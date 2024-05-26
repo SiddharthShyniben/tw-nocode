@@ -107,12 +107,15 @@ export class NC {
         );
     });
 
-    window.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      e.target.setAttribute("contenteditable", true);
+    const editEl = (el) => {
+      el.setAttribute("contenteditable", true);
 
-      const p = e.target.querySelectorAll(".muy-editable");
-      if (!p) return;
+      let p = el.querySelector(".muy-editable");
+      if (!p) {
+        if (el.classList.contains("muy-editable")) p = el;
+        else return;
+      }
+
       const s = window.getSelection(),
         r = document.createRange();
 
@@ -120,10 +123,20 @@ export class NC {
       r.setEnd(p, 0);
       s.removeAllRanges();
       s.addRange(r);
+    };
+
+    window.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      editEl(e.target);
     });
 
     window.addEventListener("click", (e) => {
       if (!this.inside(e)) return;
+      if (e.target instanceof HTMLHeadingElement) {
+        editEl(e.target);
+        return;
+      }
+
       const here = { x: e.clientX, y: e.clientY };
       const closestInsertMarker = this.insertMarkers.sort(
         (a, b) =>

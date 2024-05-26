@@ -29,6 +29,34 @@ export function createColumns({ number, gap } = { number: 3 }) {
   return el;
 }
 
+export function createBox({ shadow } = { shadow: "" }) {
+  const el = document.createElement("div");
+  el.classList.add("shadow" + (shadow ? "-" + shadow : ""));
+  el.setAttribute("data-name", "box");
+  return el;
+}
+
+export function createH1({ level } = { level: 1 }) {
+  if (isNaN(level) || level < 1 || level > 6) level = 1;
+  const el = document.createElement("h" + level);
+  if (level == 1)
+    el.classList.add(
+      ..."muy-editable mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white".split(
+        " ",
+      ),
+    );
+  else if (level > 1 && level < 6)
+    el.classList.add(
+      ...`text-${6 - level == 1 ? "" : 6 - level}xl font-extrabold dark:text-white`.split(
+        " ",
+      ),
+    );
+  else el.classList.add("text-lg", "font-bold", "dark:text-white");
+  el.innerHTML = "heading goes here...";
+  el.setAttribute("data-name", "h1");
+  return el;
+}
+
 export const components = [
   { name: "container", fn: createContainer },
   {
@@ -38,6 +66,16 @@ export const components = [
       number: 3,
       gap: 0,
     },
+  },
+  {
+    name: "box",
+    fn: createBox,
+    options: { shadow: "" },
+  },
+  {
+    name: "heading",
+    fn: createH1,
+    options: { level: 1 },
   },
   {
     name: "button",
