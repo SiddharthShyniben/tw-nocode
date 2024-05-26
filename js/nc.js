@@ -1,12 +1,13 @@
-import { components, createButton } from "./components.js";
+import { components, createButton, options } from "./components.js";
 import { getLineDistance, getOffset, walk } from "./util.js";
 
 export class NC {
-  constructor(root, buttons, options, path) {
+  constructor({ root, buttons, options, path, contextmenu }) {
     this.root = root;
     this.buttons = buttons;
     this.options = options;
     this.path = path;
+    this.contextmenu = contextmenu;
 
     this.insertMarkers = [];
 
@@ -135,7 +136,58 @@ export class NC {
 
     this.root.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      this.editEl(e.target);
+
+      const element = e.target;
+
+      this.contextmenu.innerHTML = `<h3 id="c-title" class="text-lg text-white font-bold mb-4">${element.dataset.name}</h3>`;
+
+      for (const option of options) {
+        if (option.kind == "select") {
+          const select = document.createElement("select");
+          select.className =
+            "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 z-[99999]";
+          select.id = option.id;
+
+          for (let s of option.options) {
+            const option = document.createElement("option");
+            option.innerText = s;
+            select.appendChild(option);
+          }
+
+          this.contextmenu.appendChild(select);
+
+          const existingClass = [...element.classList].find(option.existing);
+          select.selectedIndex = existingClass
+            ? option.declass(existingClass)
+            : 0;
+
+          if (select.selectedIndex < 0) select.selectedIndex = 0;
+          console.log(select.selectedIndex);
+
+          const o = select.children[select.selectedIndex];
+          o.setAttribute("selected", "selected");
+
+          select.onchange = (e) => {
+            const value = option.options[e.target.selectedIndex];
+
+            if (existingClass)
+              element.classList.replace(existingClass, option.class(value));
+            else element.classList.add(option.class(value));
+          };
+        }
+      }
+
+      tippy(e.target, {
+        content: this.contextmenu,
+        allowHTML: true,
+        interactive: true,
+        appendTo: () => document.body, // NOTE: a11y?
+        sticky: true,
+        placement: "auto-start",
+        trigger: "manual",
+      }).show();
+
+      this.editEl(element);
     });
 
     this.root.addEventListener("click", (e) => {

@@ -21,6 +21,38 @@
         class="p-2 m-3 flex rounded-md shadow-sm shadow-gray-700"
       ></div>
     </div>
+    <div id="context-menu" class="p-4">
+      <h3 id="c-title" class="text-lg text-white font-bold mb-4"></h3>
+      <label
+        for="c-padding-top"
+        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+        >Top padding</label
+      >
+      <select
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 z-[99999]"
+        id="c-padding-top"
+      >
+        <option value="0" selected>no padding</option>
+        <option value="1">0.25rem</option>
+        <option value="2">0.5rem</option>
+        <option value="3">0.75rem</option>
+        <option value="4">1rem</option>
+        <option value="5">1.25rem</option>
+        <option value="6">1.5rem</option>
+        <option value="8">2rem</option>
+        <option value="10">2.5rem</option>
+        <option value="12">3rem</option>
+        <option value="16">4rem</option>
+        <option value="20">5rem</option>
+        <option value="24">6rem</option>
+        <option value="32">8rem</option>
+        <option value="40">10rem</option>
+        <option value="48">12rem</option>
+        <option value="56">14rem</option>
+        <option value="64">16rem</option>
+        <option value="px">1px</option>
+      </select>
+    </div>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script type="module" src="js/main.js"></script>
