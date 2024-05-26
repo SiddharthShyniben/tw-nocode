@@ -1,3 +1,5 @@
+import { makePadding } from "./util.js";
+
 export function createButton({ background } = { background: "blue" }) {
   const classes = `muy-stop-propagation bg-${background}-500 hover:bg-${background}-700 text-white font-bold pt-2 pb-2 pl-4 pr-4 rounded`;
   const el = document.createElement("button");
@@ -64,62 +66,11 @@ export function createHeading({ level } = { level: 1 }) {
   return el;
 }
 
-const paddingOpts = [
-  "none",
-  "0.25rem",
-  "0.5rem",
-  "0.75rem",
-  "1rem",
-  "1.25rem",
-  "1.5rem",
-  "2rem",
-  "2.5rem",
-  "3rem",
-  "4rem",
-  "5rem",
-  "6rem",
-  "8rem",
-  "10rem",
-  "12rem",
-  "14rem",
-  "16rem",
-  "1px",
-];
-
-const paddingClass = (prefix) => (option) => {
-  if (option == "1px") return `${prefix}-px`;
-  if (option == "none") return `${prefix}-0`;
-  else {
-    const rem = +option.slice(0, -3);
-    return `${prefix}-${4 * rem}`;
-  }
-};
-
-const paddingDeclass = (prefix) => (option) => {
-  if (option == `${prefix}-px`) return paddingOpts.length - 1;
-  if (option == `${prefix}-0`) return 0;
-  else {
-    return paddingOpts.findIndex(
-      (el) => option.split("-").pop() / 4 + "rem" == el,
-    );
-  }
-};
-
-const makePadding = (side) => ({
-  name: `${side} padding`,
-  id: `c-padding-${(side = side.toLowerCase())}`,
-  kind: "select",
-  options: paddingOpts,
-  class: paddingClass(`p${(side = side[0])}`),
-  declass: paddingDeclass(`p${side}`),
-  existing: (el) => el.startsWith(`p${side}`),
-});
-
 export const options = [
-  makePadding("Top"),
-  makePadding("Bottom"),
-  makePadding("Left"),
-  makePadding("Right"),
+  {
+    name: "Padding",
+    opts: ["Top", "Bottom", "Left", "Right"].map(makePadding),
+  },
 ];
 
 export const components = [

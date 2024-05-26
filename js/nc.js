@@ -110,6 +110,7 @@ export class NC {
   }
 
   listen() {
+    window.addEventListener("keydown", listener);
     this.root.addEventListener("mousemove", (e) => {
       if (this.creator) this.renderInserts(e);
     });
@@ -118,48 +119,67 @@ export class NC {
       e.preventDefault();
 
       const element = e.target;
+      this._elToCopy = element;
 
       this.contextmenu.innerHTML = `<h3 id="c-title" class="text-lg text-white font-bold mb-4">${element.dataset.name}</h3>`;
 
-      for (const option of options) {
-        if (option.kind == "select") {
-          const label = document.createElement("label");
-          label.innerHTML = option.name;
-          label.setAttribute("for", option.id);
-          label.classList.add(...classNames.label);
+      for (const group of options) {
+        const item = document.createElement("p");
+        item.classList.add("border-bottom", "border-grey-600");
+        item.innerHTML = group.name + " >";
 
-          const select = document.createElement("select");
-          select.classList.add(...classNames.select);
-          select.id = option.id;
+        const tippyEl = document.createElement("div");
 
-          for (let s of option.options) {
-            const option = document.createElement("option");
-            option.innerText = s;
-            select.appendChild(option);
+        for (const option of group.opts) {
+          if (option.kind == "select") {
+            const label = document.createElement("label");
+            label.innerHTML = option.name;
+            label.setAttribute("for", option.id);
+            label.classList.add(...classNames.label);
+
+            const select = document.createElement("select");
+            select.classList.add(...classNames.select);
+            select.id = option.id;
+
+            for (let s of option.options) {
+              const option = document.createElement("option");
+              option.innerText = s;
+              select.appendChild(option);
+            }
+
+            tippyEl.appendChild(label);
+            tippyEl.appendChild(select);
+
+            const existingClass = [...element.classList].find(option.existing);
+            select.selectedIndex = existingClass
+              ? option.declass(existingClass)
+              : 0;
+
+            if (select.selectedIndex < 0) select.selectedIndex = 0;
+            console.log(select.selectedIndex);
+
+            const o = select.children[select.selectedIndex];
+            o.setAttribute("selected", "selected");
+
+            select.onchange = (e) => {
+              const value = option.options[e.target.selectedIndex];
+
+              if (existingClass)
+                element.classList.replace(existingClass, option.class(value));
+              else element.classList.add(option.class(value));
+            };
           }
-
-          this.contextmenu.appendChild(label);
-          this.contextmenu.appendChild(select);
-
-          const existingClass = [...element.classList].find(option.existing);
-          select.selectedIndex = existingClass
-            ? option.declass(existingClass)
-            : 0;
-
-          if (select.selectedIndex < 0) select.selectedIndex = 0;
-          console.log(select.selectedIndex);
-
-          const o = select.children[select.selectedIndex];
-          o.setAttribute("selected", "selected");
-
-          select.onchange = (e) => {
-            const value = option.options[e.target.selectedIndex];
-
-            if (existingClass)
-              element.classList.replace(existingClass, option.class(value));
-            else element.classList.add(option.class(value));
-          };
         }
+        this.contextmenu.appendChild(item);
+
+        tippy(item, {
+          content: tippyEl,
+          allowHTML: true,
+          interactive: true,
+          appendTo: () => document.body, // NOTE: a1:wq1y?
+          sticky: true,
+          placement: "left",
+        });
       }
 
       tippy(e.target, {
@@ -170,6 +190,9 @@ export class NC {
         sticky: true,
         placement: "auto-start",
         trigger: "manual",
+        onHide() {
+          this._elToCopy = null;
+        },
       }).show();
 
       this.editEl(element);
@@ -178,14 +201,20 @@ export class NC {
     this.root.addEventListener("click", (e) => this.create(e));
 
     window.addEventListener("keypress", (e) => {
-      if (e.key == "z" && e.ctrlKey) {
-        const content = this.root.innerHTML;
-        this.redoHistory.push(content);
-        this.root.innerHTML = this.undoHistory.pop() || content;
-      } else if (e.key == "r" && e.ctrlKey) {
-        const content = this.root.innerHTML;
-        this.saveUndo();
-        this.root.innerHTML = this.redoHistory.pop() || content;
+      if (e.ctrlKey) {
+        if (e.key == "z") {
+          const content = this.root.innerHTML;
+          this.redoHistory.push(content);
+          this.root.innerHTML = this.undoHistory.pop() || content;
+        } else if (e.key == "r") {
+          const content = this.root.innerHTML;
+          this.saveUndo();
+          this.root.innerHTML = this.redoHistory.pop() || content;
+        } else if (e.key == "c") {
+          e.preventDefault();
+          const content = this._elToCopy.innerHTML || this.root.innerHTML;
+          console.log("copying", { content });
+        }
       }
     });
   }
