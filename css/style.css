@@ -42,13 +42,19 @@ h6 {
   isolation: isolate;
 }
 
-#main *:not(.insert-marker) {
-  border: 1px solid transparent;
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }
 
 #main *:hover,
-#main *:not(.insert-marker),
-#main *:hover *:not(.insert-marker) {
+#main .drag-hover,
+#main:hover *:not(.insert-marker),
+#main *:hover *:not(.insert-marker),
+#main .drag-hover *:not(.insert-marker) {
   border: 1px solid red;
 }
 
@@ -56,17 +62,32 @@ h6 {
   border: 1px solid transparent;
 }
 
-.insert-marker.hl,
 #main:hover .insert-marker.hl,
-#main *:hover > .insert-marker.hl {
+#main.drag-hover .insert-marker.hl,
+#main *:hover > .insert-marker.hl,
+#main .drag-hover > .insert-marker.hl {
   border: 1px solid blue;
 }
 
+#main.drag-hover .insert-marker,
 #main:hover .insert-marker {
   margin: 1rem 0;
 }
 
+[data-name~="button-group"].drag-hover > .insert-marker,
+[data-name~="button-group"]:hover > .insert-marker {
+  margin: 1rem 0;
+  min-width: 5px;
+}
+
+[data-name~="button-group"] > .insert-marker:first-child:last-child {
+  margin: 1rem 0;
+  min-width: 100px;
+}
+
 #main:hover > .insert-marker,
+#main.drag-hover > .insert-marker,
+#main .drag-hover > .insert-marker,
 #main *:hover > .insert-marker {
   border: 1px dashed red;
 }
@@ -78,8 +99,8 @@ h6 {
   break-inside: avoid;
 }
 
-[data-name~="columns"] > .insert-marker.hl,
-[data-name~="columns"] > .insert-marker.hl {
+#main:hover [data-name~="columns"] > .insert-marker.hl,
+#main:hover [data-name~="columns"] > .insert-marker.hl {
   border: 1px solid blue;
   background: blue;
 }

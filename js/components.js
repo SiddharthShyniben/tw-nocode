@@ -1,9 +1,14 @@
 export function createButton({ background } = { background: "blue" }) {
-  const classes = `muy-editable bg-${background}-500 hover:bg-${background}-700 text-white font-bold py-2 px-4 rounded`;
+  const classes = `muy-stop-propagation bg-${background}-500 hover:bg-${background}-700 text-white font-bold py-2 px-4 rounded`;
   const el = document.createElement("button");
   el.setAttribute("data-name", "button");
-  el.innerHTML = "Button";
+  el.innerHTML = "<span class='muy-editable'>Button</span>";
   el.classList.add(...classes.split(" "));
+
+  el.addEventListener("click", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  });
   return el;
 }
 
@@ -11,6 +16,7 @@ export function createButtonGroup() {
   const classes = "inline-flex rounded-md shadow-sm";
   const el = document.createElement("div");
   el.classList.add(...classes.split(" "));
+  el.setAttribute("data-name", "button-group");
   return el;
 }
 
@@ -36,7 +42,7 @@ export function createBox({ shadow } = { shadow: "" }) {
   return el;
 }
 
-export function createH1({ level } = { level: 1 }) {
+export function createHeading({ level } = { level: 1 }) {
   if (isNaN(level) || level < 1 || level > 6) level = 1;
   const el = document.createElement("h" + level);
   if (level == 1)
@@ -58,9 +64,10 @@ export function createH1({ level } = { level: 1 }) {
 }
 
 export const components = [
-  { name: "container", fn: createContainer },
+  { name: "container", icon: "image_aspect_ratio", fn: createContainer },
   {
     name: "columns",
+    icon: "view_column",
     fn: createColumns,
     options: {
       number: 3,
@@ -69,20 +76,23 @@ export const components = [
   },
   {
     name: "box",
+    icon: "square",
     fn: createBox,
     options: { shadow: "" },
   },
   {
     name: "heading",
-    fn: createH1,
+    icon: "format_h1",
+    fn: createHeading,
     options: { level: 1 },
   },
   {
     name: "button",
+    icon: "buttons_alt",
     fn: createButton,
     options: {
       background: "blue",
     },
   },
-  { name: "button group", fn: createButtonGroup },
+  { name: "button group", icon: "ad_group", fn: createButtonGroup },
 ];

@@ -35,12 +35,13 @@ export class NC {
     for (const component of components) {
       const button = document.createElement("button");
       button.classList.add(
-        ..."bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded".split(
-          " ",
-        ),
+        ..."text-white px-3 opacity-70 hover:opacity-100".split(" "),
       );
-      button.innerText = "Create a " + component.name;
-      button.addEventListener("click", () => {
+      button.setAttribute("draggable", true);
+      button.setAttribute("data-tippy-content", component.name);
+      button.innerHTML = `<span class='material-symbols-outlined'>${component.icon}</span>`;
+
+      const applyButton = () => {
         this.options.innerHTML = "";
         this.creator = component.fn;
 
@@ -64,10 +65,40 @@ export class NC {
             this.options.appendChild(input);
           }
         }
+      };
+
+      button.addEventListener("click", applyButton);
+      button.addEventListener("dragstart", () => {
+        applyButton();
+        walk(this.root, (el) => {
+          el.classList.add("drag-hover");
+        });
+      });
+      button.addEventListener("drag", (e) => this.renderInserts(e));
+      button.addEventListener("dragend", (e) => {
+        walk(this.root, (el) => {
+          el.classList.remove("drag-hover");
+        });
+        if (this.inside(e)) this.create(e);
       });
 
       this.buttons.appendChild(button);
     }
+
+    tippy.createSingleton(tippy("[data-tippy-content]"), {
+      delay: [500, 0],
+      moveTransition: "transform 0.2s ease-out",
+    });
+  }
+
+  inside({ clientX, clientY }) {
+    const rect = getOffset(this.root);
+    return (
+      clientX >= rect.x &&
+      clientY >= rect.y &&
+      clientX <= rect.x2 &&
+      clientY <= rect.y2
+    );
   }
 
   populateInsertMarkers() {
@@ -78,7 +109,11 @@ export class NC {
       const children = el.childNodes;
       if (!children) return;
       if (children.length == 0) return el.appendChild(this.marker());
-      if (el.classList.contains("muy-editable")) return;
+      if (
+        el.classList.contains("muy-editable") ||
+        el.classList.contains("muy-stop-propagation")
+      )
+        return;
 
       const toExecute = [];
 
@@ -95,66 +130,16 @@ export class NC {
 
   listen() {
     this.root.addEventListener("mousemove", (e) => {
-      const here = { x: e.clientX, y: e.clientY };
-      const p = [...document.elementsFromPoint(here.x, here.y)]
-        .slice(0, -3)
-        .map((el) => el.getAttribute("data-name"))
-        .filter(Boolean)
-        .reverse()
-        .join(" > ");
-      (this.path.innerText = p) || (this.path.innerHTML = "&nbsp;");
-      this.insertMarkers
-        .sort(
-          (a, b) =>
-            getLineDistance(here, getOffset(a)) -
-            getLineDistance(here, getOffset(b)),
-        )
-        .forEach((el, i) =>
-          i == 0 ? el.classList.add("hl") : el.classList.remove("hl"),
-        );
+      this.renderInserts(e);
     });
-
-    const editEl = (el) => {
-      el.setAttribute("contenteditable", true);
-
-      let p = el.querySelector(".muy-editable");
-      if (!p) {
-        if (el.classList.contains("muy-editable")) p = el;
-        else return;
-      }
-
-      const s = window.getSelection(),
-        r = document.createRange();
-
-      r.setStart(p, 0);
-      r.setEnd(p, 0);
-      s.removeAllRanges();
-      s.addRange(r);
-    };
 
     this.root.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      editEl(e.target);
+      this.editEl(e.target);
     });
 
     this.root.addEventListener("click", (e) => {
-      if (e.target instanceof HTMLHeadingElement) {
-        editEl(e.target);
-        e.target.addEventListener("change", this.saveUndo);
-        return;
-      }
-
-      const here = { x: e.clientX, y: e.clientY };
-      const closestInsertMarker = this.insertMarkers.sort(
-        (a, b) =>
-          getLineDistance(here, getOffset(a)) -
-          getLineDistance(here, getOffset(b)),
-      )[0];
-
-      this.redoHistory = [];
-      this.saveUndo();
-      closestInsertMarker.replaceWith(this.creator(this.creatorOptions));
-      this.populateInsertMarkers();
+      this.create(e);
     });
 
     window.addEventListener("keypress", (e) => {
@@ -168,6 +153,65 @@ export class NC {
         this.root.innerHTML = this.redoHistory.pop() || content;
       }
     });
+  }
+
+  editEl(el) {
+    el.setAttribute("contenteditable", true);
+
+    let p = el.querySelector(".muy-editable");
+    if (!p) {
+      if (el.classList.contains("muy-editable")) p = el;
+      else return;
+    }
+
+    const s = window.getSelection(),
+      r = document.createRange();
+
+    r.setStart(p, 0);
+    r.setEnd(p, 0);
+    s.removeAllRanges();
+    s.addRange(r);
+  }
+
+  renderInserts(e) {
+    const here = { x: e.clientX, y: e.clientY };
+    const p = [...document.elementsFromPoint(here.x, here.y)]
+      .slice(0, -3)
+      .map((el) => el.getAttribute("data-name"))
+      .filter(Boolean)
+      .reverse()
+      .join(" > ");
+    (this.path.innerText = p) || (this.path.innerHTML = "&nbsp;");
+    this.insertMarkers
+      .sort(
+        (a, b) =>
+          getLineDistance(here, getOffset(a)) -
+          getLineDistance(here, getOffset(b)),
+      )
+      .forEach((el, i) =>
+        i == 0 ? el.classList.add("hl") : el.classList.remove("hl"),
+      );
+  }
+
+  create(e) {
+    if (!this.inside(e)) return;
+    if (e.target instanceof HTMLHeadingElement) {
+      this.editEl(e.target);
+      e.target.addEventListener("change", this.saveUndo);
+      return;
+    }
+
+    const here = { x: e.clientX, y: e.clientY };
+    const closestInsertMarker = this.insertMarkers.sort(
+      (a, b) =>
+        getLineDistance(here, getOffset(a)) -
+        getLineDistance(here, getOffset(b)),
+    )[0];
+
+    this.redoHistory = [];
+    this.saveUndo();
+    closestInsertMarker.replaceWith(this.creator(this.creatorOptions));
+    this.populateInsertMarkers();
   }
 
   marker() {
