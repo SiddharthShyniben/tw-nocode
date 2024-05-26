@@ -52,32 +52,31 @@ h6 {
 
 .insert-marker {
   border: 1px solid transparent;
-  margin: 1rem;
+  margin: 1rem 0;
 }
 
 .insert-marker.hl,
-*:hover > .insert-marker.hl {
+#main:hover .insert-marker.hl,
+#main *:hover > .insert-marker.hl {
   border: 1px solid blue;
 }
 
-*:hover > .insert-marker {
+#main:hover > .insert-marker,
+#main *:hover > .insert-marker {
   border: 1px dashed red;
 }
 
 [data-name~="columns"] > .insert-marker {
-  width: 50px;
-  height: 50px;
   margin: 0;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 [data-name~="columns"] > .insert-marker.hl,
-*:hover [data-name~="columns"] > .insert-marker.hl {
+[data-name~="columns"] > .insert-marker.hl {
   border: 1px solid blue;
   background: blue;
-}
-
-*:hover [data-name~="columns"] > .insert-marker {
-  background: red;
 }
 
 [data-name~="button"] .insert-marker {
