@@ -105,27 +105,21 @@ const paddingDeclass = (prefix) => (option) => {
   }
 };
 
+const makePadding = (side) => ({
+  name: `${side} padding`,
+  id: `c-padding-${(side = side.toLowerCase())}`,
+  kind: "select",
+  options: paddingOpts,
+  class: paddingClass(`p${(side = side[0])}`),
+  declass: paddingDeclass(`p${side}`),
+  existing: (el) => el.startsWith(`p${side}`),
+});
+
 export const options = [
-  {
-    name: "Top padding",
-    id: "c-padding-top",
-    kind: "select",
-    options: paddingOpts,
-
-    class: paddingClass("pt"),
-    declass: paddingDeclass("pt"),
-    existing: (el) => el.startsWith("pt"),
-  },
-  {
-    name: "Bottom padding",
-    id: "c-padding-bottom",
-    kind: "select",
-    options: paddingOpts,
-
-    class: paddingClass("pb"),
-    declass: paddingDeclass("pb"),
-    existing: (el) => el.startsWith("pb"),
-  },
+  makePadding("Top"),
+  makePadding("Bottom"),
+  makePadding("Left"),
+  makePadding("Right"),
 ];
 
 export const components = [

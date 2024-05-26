@@ -1,5 +1,5 @@
-import { components, createButton, options } from "./components.js";
-import { getLineDistance, getOffset, walk } from "./util.js";
+import { components, options } from "./components.js";
+import { classNames, getLineDistance, getOffset, walk } from "./util.js";
 
 export class NC {
   constructor({ root, buttons, options, path, contextmenu }) {
@@ -11,7 +11,7 @@ export class NC {
 
     this.insertMarkers = [];
 
-    this.creator = createButton;
+    this.creator = null;
     this.creatorOptions = {};
 
     this.undoHistory = [];
@@ -27,35 +27,29 @@ export class NC {
     this.listen();
   }
 
-  saveUndo() {
-    this.undoHistory.push(this.root.innerHTML);
-    if (this.undoHistory.length > this.maxUndo) this.undoHistory.shift();
-  }
-
   createButtons() {
+    const buttons = [];
+
     for (const component of components) {
       const button = document.createElement("button");
-      button.classList.add(
-        ..."text-white px-3 opacity-70 hover:opacity-100".split(" "),
-      );
+      button.classList.add(...classNames.button);
       button.setAttribute("draggable", true);
       button.setAttribute("data-tippy-content", component.name);
       button.innerHTML = `<span class='material-symbols-outlined'>${component.icon}</span>`;
+      buttons.push(button);
 
       const applyButton = () => {
         this.options.innerHTML = "";
         this.creator = component.fn;
+        buttons.forEach((b) => b.classList.remove("opacity-100"));
+        button.classList.add("opacity-100");
 
         this.creatorOptions = component.options || {};
         if (component.options) {
           for (const k in component.options) {
             const input = document.createElement("input");
             input.setAttribute("placeholder", k);
-            input.classList.add(
-              ..."bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500".split(
-                " ",
-              ),
-            );
+            input.classList.add(...classNames.input);
             input.addEventListener("keydown", (e) => {
               if (e.key == "Enter") {
                 const value = e.target.value;
@@ -71,15 +65,11 @@ export class NC {
       button.addEventListener("click", applyButton);
       button.addEventListener("dragstart", () => {
         applyButton();
-        walk(this.root, (el) => {
-          el.classList.add("drag-hover");
-        });
+        walk(this.root, (el) => el.classList.add("drag-hover"));
       });
       button.addEventListener("drag", (e) => this.renderInserts(e));
       button.addEventListener("dragend", (e) => {
-        walk(this.root, (el) => {
-          el.classList.remove("drag-hover");
-        });
+        walk(this.root, (el) => el.classList.remove("drag-hover"));
         if (this.inside(e)) this.create(e);
       });
 
@@ -90,16 +80,6 @@ export class NC {
       delay: [500, 0],
       moveTransition: "transform 0.2s ease-out",
     });
-  }
-
-  inside({ clientX, clientY }) {
-    const rect = getOffset(this.root);
-    return (
-      clientX >= rect.x &&
-      clientY >= rect.y &&
-      clientX <= rect.x2 &&
-      clientY <= rect.y2
-    );
   }
 
   populateInsertMarkers() {
@@ -131,7 +111,7 @@ export class NC {
 
   listen() {
     this.root.addEventListener("mousemove", (e) => {
-      this.renderInserts(e);
+      if (this.creator) this.renderInserts(e);
     });
 
     this.root.addEventListener("contextmenu", (e) => {
@@ -143,9 +123,13 @@ export class NC {
 
       for (const option of options) {
         if (option.kind == "select") {
+          const label = document.createElement("label");
+          label.innerHTML = option.name;
+          label.setAttribute("for", option.id);
+          label.classList.add(...classNames.label);
+
           const select = document.createElement("select");
-          select.className =
-            "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 z-[99999]";
+          select.classList.add(...classNames.select);
           select.id = option.id;
 
           for (let s of option.options) {
@@ -154,6 +138,7 @@ export class NC {
             select.appendChild(option);
           }
 
+          this.contextmenu.appendChild(label);
           this.contextmenu.appendChild(select);
 
           const existingClass = [...element.classList].find(option.existing);
@@ -190,9 +175,7 @@ export class NC {
       this.editEl(element);
     });
 
-    this.root.addEventListener("click", (e) => {
-      this.create(e);
-    });
+    this.root.addEventListener("click", (e) => this.create(e));
 
     window.addEventListener("keypress", (e) => {
       if (e.key == "z" && e.ctrlKey) {
@@ -262,7 +245,8 @@ export class NC {
 
     this.redoHistory = [];
     this.saveUndo();
-    closestInsertMarker.replaceWith(this.creator(this.creatorOptions));
+    if (this.creator)
+      closestInsertMarker.replaceWith(this.creator(this.creatorOptions));
     this.populateInsertMarkers();
   }
 
@@ -271,5 +255,20 @@ export class NC {
     insertMarker.classList.add("insert-marker");
     this.insertMarkers.push(insertMarker);
     return insertMarker;
+  }
+
+  inside({ clientX, clientY }) {
+    const rect = getOffset(this.root);
+    return (
+      clientX >= rect.x &&
+      clientY >= rect.y &&
+      clientX <= rect.x2 &&
+      clientY <= rect.y2
+    );
+  }
+
+  saveUndo() {
+    this.undoHistory.push(this.root.innerHTML);
+    if (this.undoHistory.length > this.maxUndo) this.undoHistory.shift();
   }
 }

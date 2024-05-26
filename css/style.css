@@ -54,7 +54,8 @@ h6 {
 #main .drag-hover,
 #main:hover *:not(.insert-marker),
 #main *:hover *:not(.insert-marker),
-#main .drag-hover *:not(.insert-marker) {
+#main .drag-hover *:not(.insert-marker),
+#main:has(~ [data-tippy-root]:hover) * {
   border: 1px solid red;
 }
 
@@ -63,14 +64,17 @@ h6 {
 }
 
 #main:hover .insert-marker.hl,
-#main.drag-hover .insert-marker.hl,
-#main *:hover > .insert-marker.hl,
-#main .drag-hover > .insert-marker.hl {
+#main.drag-hover .insert-marker.hl {
+  border: 1px solid blue;
+}
+
+#main:has(~ [data-tippy-root]:hover) .insert-marker.hl {
   border: 1px solid blue;
 }
 
 #main.drag-hover .insert-marker,
-#main:hover .insert-marker {
+#main:hover .insert-marker,
+#main:has(~ [data-tippy-root]:hover) .insert-marker {
   margin: 1rem 0;
 }
 
@@ -88,7 +92,8 @@ h6 {
 #main:hover > .insert-marker,
 #main.drag-hover > .insert-marker,
 #main .drag-hover > .insert-marker,
-#main *:hover > .insert-marker {
+#main *:hover > .insert-marker,
+#main:has(~ [data-tippy-root]:hover) .insert-marker {
   border: 1px dashed red;
 }
 
