@@ -66,23 +66,7 @@ export function createHeading({ level } = { level: 1 }) {
 
 const paddingOpts = [
   "none",
-  "0.25rem",
-  "0.5rem",
-  "0.75rem",
-  "1rem",
-  "1.25rem",
-  "1.5rem",
-  "2rem",
-  "2.5rem",
-  "3rem",
-  "4rem",
-  "5rem",
-  "6rem",
-  "8rem",
-  "10rem",
-  "12rem",
-  "14rem",
-  "16rem",
+  ...[.25, .5, .75, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12, 14, 16].map(x => x + "rem"),
   "1px",
 ];
 
