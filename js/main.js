@@ -15,8 +15,11 @@ const inside = ({ clientX, clientY }) => {
 };
 
 let creator = createButton;
+let creatorOptions = {};
 
 const buttons = document.querySelector("#buttons");
+const options = document.querySelector("#options");
+const path = document.querySelector("#path");
 
 for (const component of components) {
   const button = document.createElement("button");
@@ -26,7 +29,32 @@ for (const component of components) {
     ),
   );
   button.innerText = "Create a " + component.name;
-  button.addEventListener("click", () => (creator = component.fn));
+  button.addEventListener("click", () => {
+    options.innerHTML = "";
+    creator = component.fn;
+
+    if (component.options) {
+      for (const k in component.options) {
+        creatorOptions = component.options || {};
+        const input = document.createElement("input");
+        input.setAttribute("placeholder", k);
+        input.classList.add(
+          ..."bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500".split(
+            " ",
+          ),
+        );
+        input.addEventListener("keydown", (e) => {
+          if (e.key == "Enter") {
+            const value = e.target.value;
+            creatorOptions[k] = value;
+            e.target.value = "";
+          }
+        });
+        options.appendChild(input);
+      }
+    }
+  });
+
   buttons.appendChild(button);
 }
 
@@ -65,6 +93,13 @@ populateInsertMarkers();
 window.addEventListener("mousemove", (e) => {
   if (!inside(e)) return insertMarkers.forEach((e) => e.classList.remove("hl"));
   const here = { x: e.clientX, y: e.clientY };
+  const p = [...document.elementsFromPoint(here.x, here.y)]
+    .slice(0, -3)
+    .map((el) => el.getAttribute("data-name"))
+    .filter(Boolean)
+    .reverse()
+    .join(" > ");
+  path.innerText = p;
   insertMarkers
     .sort(
       (a, b) =>
@@ -80,7 +115,7 @@ window.addEventListener("contextmenu", (e) => {
   e.preventDefault();
   e.target.setAttribute("contenteditable", true);
 
-  const p = e.target.querySelector(".muy-editable");
+  const p = e.target.querySelectorAll(".muy-editable");
   if (!p) return;
   const s = window.getSelection(),
     r = document.createRange();
@@ -99,17 +134,6 @@ window.addEventListener("click", (e) => {
       getLineDistance(here, getOffset(a)) - getLineDistance(here, getOffset(b)),
   )[0];
 
-  closestInsertMarker.replaceWith(creator());
+  closestInsertMarker.replaceWith(creator(creatorOptions));
   populateInsertMarkers();
-});
-
-document.querySelector("input").addEventListener("keydown", (e) => {
-  if (e.key == "Enter") {
-    const value = e.target.value;
-    const div = document.createElement("div");
-    div.innerHTML = value;
-    creator = () => div.firstChild;
-    console.log(creator);
-    e.target.value = "";
-  }
 });

@@ -58,17 +58,11 @@ h6 {
   border: 1px dashed red;
 }
 
-#main div:not(.insert-marker) {
-  margin: 3rem;
-}
-
 #main .insert-marker.hl {
   border: 1px solid blue;
 }
 
 #main {
-  width: 1500px;
   min-height: 100px;
-  margin: 3rem auto;
   border: 3px solid black;
 }
