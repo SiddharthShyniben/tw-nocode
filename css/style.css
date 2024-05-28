@@ -50,10 +50,11 @@ h6 {
     "opsz" 24;
 }
 
-body, #main {
+body,
+#main {
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow-y: hidden;
 }
 
 #main *:hover,

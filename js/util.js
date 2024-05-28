@@ -49,58 +49,6 @@ export function getLineDistance(point, line) {
   return dx * dx + dy * dy;
 }
 
-export const classNames = {
-  button: ["text-white", "px-3", "opacity-70", "hover:opacity-100"],
-  input: [
-    "bg-gray-50",
-    "border",
-    "border-gray-300",
-    "text-gray-900",
-    "text-sm",
-    "rounded-lg",
-    "focus:ring-blue-500",
-    "focus:border-blue-500",
-    "block",
-    "w-full",
-    "p-2.5",
-    "dark:bg-gray-700",
-    "dark:border-gray-600",
-    "dark:placeholder-gray-400",
-    "dark:text-white",
-    "dark:focus:ring-blue-500",
-    "dark:focus:border-blue-500",
-  ],
-  label: [
-    "block",
-    "mb-2",
-    "text-sm",
-    "font-medium",
-    "text-gray-900",
-    "dark:text-white",
-  ],
-  select: [
-    "bg-gray-50",
-    "border",
-    "border-gray-300",
-    "text-gray-900",
-    "text-sm",
-    "rounded-lg",
-    "focus:ring-blue-500",
-    "focus:border-blue-500",
-    "block",
-    "w-full",
-    "p-2.5",
-    "dark:bg-gray-700",
-    "dark:border-gray-600",
-    "dark:placeholder-gray-400",
-    "dark:text-white",
-    "dark:focus:ring-blue-500",
-    "dark:focus:border-blue-500",
-    "z-[99999]",
-    "mb-3",
-  ],
-};
-
 const paddingOpts = [
   "none",
   [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12, 14, 16].map(

@@ -1,5 +1,6 @@
 import { components, options } from "./components.js";
-import { classNames, getLineDistance, getOffset, walk } from "./util.js";
+import { getLineDistance, getOffset, walk } from "./util.js";
+import { classNames } from "./classes.js";
 
 export class NC {
   constructor({ root, buttons, options, path, contextmenu }) {
@@ -50,13 +51,28 @@ export class NC {
             const input = document.createElement("input");
             input.setAttribute("placeholder", k);
             input.classList.add(...classNames.input);
-            input.addEventListener("keydown", (e) => {
-              if (e.key == "Enter") {
-                const value = e.target.value;
-                this.creatorOptions[k] = value;
-                e.target.value = "";
-              }
-            });
+
+            if (component.options[k].type == "file") {
+              input.setAttribute("type", "file");
+              input.setAttribute("accept", component.options[k].accept);
+            }
+
+            if (component.options[k].type == "file") {
+              input.addEventListener("change", () => {
+                const file = input.files[0];
+                if (!file) return;
+
+                this.creatorOptions.src = URL.createObjectURL(file);
+              });
+            } else
+              input.addEventListener("keydown", (e) => {
+                if (e.key == "Enter") {
+                  const value = e.target.value;
+                  this.creatorOptions[k] = value;
+                  e.target.value = "";
+                }
+              });
+
             this.options.appendChild(input);
           }
         }
@@ -110,7 +126,7 @@ export class NC {
   }
 
   listen() {
-    window.addEventListener("keydown", listener);
+    // window.addEventListener("keydown", listener);
     this.root.addEventListener("mousemove", (e) => {
       if (this.creator) this.renderInserts(e);
     });
